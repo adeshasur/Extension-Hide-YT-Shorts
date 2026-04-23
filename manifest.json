@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Hide YouTube Shorts",
+  "version": "1.0.0",
+  "description": "Completely hides YouTube Shorts from the YouTube website — sidebar, shelves, thumbnails, and redirects direct Shorts URLs.",
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "permissions": [],
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ]
+}
