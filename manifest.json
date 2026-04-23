@@ -3,6 +3,11 @@
   "name": "Hide YouTube Shorts",
   "version": "1.0.0",
   "description": "Completely hides YouTube Shorts from the YouTube website — sidebar, shelves, thumbnails, and redirects direct Shorts URLs.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "content_scripts": [
     {
       "matches": ["*://*.youtube.com/*"],
