@@ -4,18 +4,49 @@ chrome.runtime.onInstalled.addListener(() => {
     enabled: true,
     blockedCount: 0
   });
+
+  // Setup Declarative Net Request rules for instant redirection
+  const rules = [
+    {
+      id: 1,
+      priority: 1,
+      action: {
+        type: 'redirect',
+        redirect: { url: 'https://www.youtube.com/' }
+      },
+      condition: {
+        urlFilter: '*://*.youtube.com/shorts/*',
+        resourceTypes: ['main_frame']
+      }
+    }
+  ];
+
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [1],
+    addRules: rules
+  });
 });
 
-// SUPER RELIABLE REDIRECT (Background level)
-chrome.webNavigation.onBeforeNavigate.addListener((details) => {
-  if (details.frameId !== 0) return; // Only top-level
-  
-  chrome.storage.local.get(['enabled'], (data) => {
-    if (data.enabled !== false && details.url.includes('/shorts/')) {
-      chrome.tabs.update(details.tabId, { url: 'https://www.youtube.com/' });
+// Update rules when toggle is changed
+chrome.storage.onChanged.addListener((changes) => {
+  if (changes.enabled) {
+    const isEnabled = changes.enabled.newValue;
+    if (isEnabled) {
+      chrome.declarativeNetRequest.updateDynamicRules({
+        addRules: [{
+          id: 1,
+          priority: 1,
+          action: { type: 'redirect', redirect: { url: 'https://www.youtube.com/' } },
+          condition: { urlFilter: '*://*.youtube.com/shorts/*', resourceTypes: ['main_frame'] }
+        }]
+      });
+    } else {
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [1]
+      });
     }
-  });
-}, { url: [{ hostContains: 'youtube.com', pathPrefix: '/shorts/' }] });
+  }
+});
 
 // Listen for messages from content script to update count
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
