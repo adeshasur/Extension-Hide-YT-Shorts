@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hide YT Shorts</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo-area">
+        <img src="icons/icon48.png" alt="Logo" class="logo">
+        <h1>CleanTube</h1>
+      </div>
+      <div class="status-badge" id="statusBadge">Active</div>
+    </header>
+
+    <main>
+      <div class="card main-toggle">
+        <div class="info">
+          <span class="label">Hide Shorts</span>
+          <span class="sub-label">Entirely remove Shorts from YouTube</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="mainToggle" checked>
+          <span class="slider round"></span>
+        </label>
+      </div>
+
+      <div class="stats-row">
+        <div class="card stat-card">
+          <span class="stat-value" id="blockedCount">0</span>
+          <span class="stat-label">Shorts Blocked</span>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>Made for focus. No more distractions.</p>
+    </footer>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
