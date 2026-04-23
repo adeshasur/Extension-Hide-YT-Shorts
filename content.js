@@ -1,129 +1,119 @@
 /**
- * Hide YouTube Shorts — content.js (Advanced Edition)
+ * Hide YouTube Shorts — content.js (Ultra Fix)
  */
+
+// 1. FAST REDIRECT (Run immediately, even before storage)
+if (window.location.pathname.startsWith('/shorts/')) {
+    window.location.replace('https://www.youtube.com/');
+}
 
 let isEnabled = true;
 let totalBlocked = 0;
 
-// Initialize state from storage
+// Initialize state
 chrome.storage.local.get(['enabled', 'blockedCount'], (data) => {
-  isEnabled = data.enabled !== false;
-  totalBlocked = data.blockedCount || 0;
-  if (isEnabled) {
-    applyShield();
-  }
-});
-
-// Watch for setting changes
-chrome.storage.onChanged.addListener((changes) => {
-  if (changes.enabled) {
-    isEnabled = changes.enabled.newValue;
+    isEnabled = data.enabled !== false;
+    totalBlocked = data.blockedCount || 0;
     if (isEnabled) {
-      applyShield();
-      location.reload(); // Reload to apply hiding immediately
-    } else {
-      removeShield();
-      location.reload(); // Reload to bring Shorts back
+        initShield();
     }
-  }
 });
 
-function applyShield() {
-  if (window.location.pathname.startsWith('/shorts')) {
-    window.location.replace('https://www.youtube.com/');
-  }
-  injectCSS();
-  startObserver();
-}
-
-function removeShield() {
-  const style = document.getElementById('hys-styles');
-  if (style) style.remove();
-  if (observer) observer.disconnect();
-}
-
-function injectCSS() {
-  if (document.getElementById('hys-styles')) return;
-  const style = document.createElement('style');
-  style.id = 'hys-styles';
-  style.textContent = `
-    ytd-guide-entry-renderer a[href="/shorts"],
-    ytd-mini-guide-entry-renderer a[href="/shorts"],
-    ytd-rich-shelf-renderer[is-shorts],
-    ytd-reel-shelf-renderer,
-    ytd-video-renderer:has(a[href*="/shorts/"]),
-    ytd-grid-video-renderer:has(a[href*="/shorts/"]),
-    ytd-compact-video-renderer:has(a[href*="/shorts/"]),
-    ytd-rich-item-renderer:has(a[href*="/shorts/"]),
-    tp-yt-paper-tab:has(> yt-formatted-string[title="Shorts"]),
-    yt-chip-cloud-chip-renderer[chip-style="STYLE_HOME_FILTER"][title="Shorts"] {
-      display: none !important;
+// Watch for toggle
+chrome.storage.onChanged.addListener((changes) => {
+    if (changes.enabled) {
+        location.reload(); // Hard reload is most reliable for SPA 
     }
-  `;
-  (document.head || document.documentElement).appendChild(style);
+});
+
+function initShield() {
+    injectStaticStyles();
+    setupMutationObserver();
+    // Immediate scan
+    hideShorts();
 }
 
-function updateBlockedCount(count) {
-  if (count <= 0) return;
-  totalBlocked += count;
-  chrome.storage.local.set({ blockedCount: totalBlocked });
+function injectStaticStyles() {
+    if (document.getElementById('hys-styles')) return;
+    const style = document.createElement('style');
+    style.id = 'hys-styles';
+    style.textContent = `
+        /* Sidebar items */
+        ytd-guide-entry-renderer:has(a[href="/shorts"]),
+        ytd-mini-guide-entry-renderer:has(a[href="/shorts"]),
+        /* Shelves */
+        ytd-rich-shelf-renderer[is-shorts],
+        ytd-reel-shelf-renderer,
+        ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
+        /* Channel tabs */
+        tp-yt-paper-tab:has(yt-formatted-string[title="Shorts"]),
+        /* Video cards in feeds */
+        ytd-rich-item-renderer:has(a[href*="/shorts/"]),
+        ytd-video-renderer:has(a[href*="/shorts/"]),
+        ytd-grid-video-renderer:has(a[href*="/shorts/"]),
+        ytd-compact-video-renderer:has(a[href*="/shorts/"]),
+        /* Search chips */
+        yt-chip-cloud-chip-renderer:has(yt-formatted-string[title="Shorts"]) {
+            display: none !important;
+        }
+    `;
+    (document.head || document.documentElement).appendChild(style);
 }
 
-function hideShorts(root = document) {
-  if (!isEnabled || typeof root.querySelectorAll !== 'function') return;
+function hideShorts() {
+    if (!isEnabled) return;
+    
+    let blockedThisTurn = 0;
 
-  let found = 0;
-  
-  // Sidebar
-  root.querySelectorAll('ytd-guide-entry-renderer a[href="/shorts"], ytd-mini-guide-entry-renderer a[href="/shorts"]')
-    .forEach(a => {
-      const el = a.closest('ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer');
-      if (el && el.style.display !== 'none') {
-        el.style.display = 'none';
-        found++;
-      }
+    // Direct check for the sidebar Shorts button (YouTube often re-renders this)
+    const sidebarShorts = document.querySelectorAll('ytd-guide-entry-renderer a[href="/shorts"], ytd-mini-guide-entry-renderer a[href="/shorts"]');
+    sidebarShorts.forEach(a => {
+        const parent = a.closest('ytd-guide-entry-renderer, ytd-mini-guide-entry-renderer');
+        if (parent && parent.style.display !== 'none') {
+            parent.style.setProperty('display', 'none', 'important');
+            blockedThisTurn++;
+        }
     });
 
-  // Shelves
-  root.querySelectorAll('ytd-rich-shelf-renderer[is-shorts], ytd-reel-shelf-renderer')
-    .forEach(el => {
-      if (el.style.display !== 'none') {
-        el.style.display = 'none';
-        found++;
-      }
+    // Check for Shorts shelves
+    const shelves = document.querySelectorAll('ytd-rich-shelf-renderer[is-shorts], ytd-reel-shelf-renderer');
+    shelves.forEach(s => {
+        if (s.style.display !== 'none') {
+            s.style.setProperty('display', 'none', 'important');
+            blockedThisTurn++;
+        }
     });
 
-  // Video cards
-  root.querySelectorAll('a[href*="/shorts/"]').forEach(a => {
-    const card = a.closest('ytd-rich-item-renderer, ytd-video-renderer, ytd-grid-video-renderer, ytd-compact-video-renderer');
-    if (card && card.style.display !== 'none') {
-      card.style.display = 'none';
-      found++;
+    if (blockedThisTurn > 0) {
+        totalBlocked += blockedThisTurn;
+        chrome.storage.local.set({ blockedCount: totalBlocked });
     }
-  });
-
-  updateBlockedCount(found);
 }
 
 let observer = null;
-let debounceTimer = null;
+function setupMutationObserver() {
+    if (observer) return;
+    
+    observer = new MutationObserver(() => {
+        // SPA check: if user navigated to /shorts via JS
+        if (window.location.pathname.startsWith('/shorts/')) {
+            window.location.replace('https://www.youtube.com/');
+            return;
+        }
+        hideShorts();
+    });
 
-function startObserver() {
-  if (observer) return;
-  observer = new MutationObserver(() => {
-    if (window.location.pathname.startsWith('/shorts')) {
-      window.location.replace('https://www.youtube.com/');
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true
+    });
+}
+
+// History API patching for YouTube's SPA navigation
+const originalPushState = history.pushState;
+history.pushState = function() {
+    originalPushState.apply(this, arguments);
+    if (window.location.pathname.startsWith('/shorts/')) {
+        window.location.replace('https://www.youtube.com/');
     }
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => hideShorts(document), 200);
-  });
-  observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
-}
-
-if (document.readyState !== 'loading') {
-  if (isEnabled) startObserver();
-} else {
-  document.addEventListener('DOMContentLoaded', () => {
-    if (isEnabled) startObserver();
-  });
-}
+};
