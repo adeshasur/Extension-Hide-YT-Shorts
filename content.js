@@ -43,16 +43,18 @@ function injectStaticStyles() {
         ytd-mini-guide-entry-renderer:has(a[href="/shorts"]),
         ytd-guide-entry-renderer:has(tp-yt-paper-item[aria-label="Shorts"]),
         ytd-mini-guide-entry-renderer:has(a[title="Shorts"]),
+        ytd-guide-entry-renderer:has(a[title="Shorts"]),
+        ytd-guide-entry-renderer:has(ytd-guide-entry-renderer[focussable]:has(a[href="/shorts"])),
         /* Catch by icon path if text fails */
-        ytd-guide-entry-renderer:has(path[d*="L10 15.46v-6.92"]),
-        ytd-guide-entry-renderer:has(path[d*="m17.7 9.21"]),
+        path[d*="L10 15.46v-6.92"],
+        path[d*="m17.7 9.21"],
+        path[d*="M10 14.65v-5.27"],
         /* Shelves */
         ytd-rich-shelf-renderer[is-shorts],
         ytd-reel-shelf-renderer,
         ytd-rich-section-renderer:has(ytd-rich-shelf-renderer[is-shorts]),
         /* Channel tabs */
         tp-yt-paper-tab:has(yt-formatted-string[title="Shorts"]),
-        tp-yt-paper-tab:has(div.tab-content:contains("Shorts")),
         /* Video cards in feeds */
         ytd-rich-item-renderer:has(a[href*="/shorts/"]),
         ytd-video-renderer:has(a[href*="/shorts/"]),
@@ -60,7 +62,8 @@ function injectStaticStyles() {
         ytd-compact-video-renderer:has(a[href*="/shorts/"]),
         /* Search chips */
         yt-chip-cloud-chip-renderer:has(yt-formatted-string[title="Shorts"]),
-        [title="Shorts"] {
+        [title="Shorts"],
+        [aria-label="Shorts"] {
             display: none !important;
         }
     `;
