@@ -1,21 +1,23 @@
 {
   "manifest_version": 3,
-  "name": "Hide YouTube Shorts",
+  "name": "CleanTube: Hide YouTube Shorts",
+  "short_name": "CleanTube",
   "version": "1.0.0",
-  "description": "Completely hides YouTube Shorts from the YouTube website — sidebar, shelves, thumbnails, and redirects direct Shorts URLs.",
+  "description": "Block mindless scrolling. Hides all YouTube Shorts from sidebar, home feed, and redirects Shorts URLs for a distraction-free experience.",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "permissions": ["storage", "webNavigation", "declarativeNetRequest"],
+  "permissions": ["storage", "declarativeNetRequest"],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
-    }
+    },
+    "default_title": "CleanTube Settings"
   },
   "background": {
     "service_worker": "background.js"
@@ -25,8 +27,7 @@
       "matches": ["*://*.youtube.com/*"],
       "js": ["content.js"],
       "run_at": "document_start",
-      "all_frames": true,
-      "match_about_blank": true
+      "all_frames": true
     }
   ],
   "host_permissions": [
