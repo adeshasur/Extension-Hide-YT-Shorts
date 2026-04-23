@@ -2,45 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hide YT Shorts</title>
   <link rel="stylesheet" href="popup.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <header>
-      <div class="logo-area">
-        <img src="icons/icon48.png" alt="Logo" class="logo">
+      <div class="brand">
+        <img src="icons/icon128.png" alt="Logo">
         <h1>CleanTube</h1>
       </div>
-      <div class="status-badge" id="statusBadge">Active</div>
+      <div class="status-dot"></div>
     </header>
 
-    <main>
-      <div class="card main-toggle">
-        <div class="info">
-          <span class="label">Hide Shorts</span>
-          <span class="sub-label">Entirely remove Shorts from YouTube</span>
+    <div class="stats-banner">
+      <div class="stat-group">
+        <span class="stat-value" id="blockedCount">0</span>
+        <span class="stat-label">Vines Blocked</span>
+      </div>
+    </div>
+
+    <div class="options-list">
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-title">Hide Sidebar Button</span>
+          <span class="option-desc">Remove Shorts from side menu</span>
         </div>
         <label class="switch">
-          <input type="checkbox" id="mainToggle" checked>
-          <span class="slider round"></span>
+          <input type="checkbox" id="hideSidebar" checked>
+          <span class="slider"></span>
         </label>
       </div>
 
-      <div class="stats-row">
-        <div class="card stat-card">
-          <span class="stat-value" id="blockedCount">0</span>
-          <span class="stat-label">Shorts Blocked</span>
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-title">Hide Home Shelves</span>
+          <span class="option-desc">Clear shorts rows from feed</span>
         </div>
+        <label class="switch">
+          <input type="checkbox" id="hideHome" checked>
+          <span class="slider"></span>
+        </label>
       </div>
-    </main>
+
+      <div class="option-item">
+        <div class="option-info">
+          <span class="option-title">Redirect Shorts URLs</span>
+          <span class="option-desc">Auto-jump to home page</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="redirectAll" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
 
     <footer>
-      <p>Made for focus. No more distractions.</p>
+      <p class="footer-text">Clean and simple YouTube experience.</p>
+      <span class="footer-tag">ELITE VERSION</span>
     </footer>
   </div>
   <script src="popup.js"></script>

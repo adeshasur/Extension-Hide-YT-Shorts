@@ -1,36 +1,34 @@
+const settings = ['hideSidebar', 'hideHome', 'redirectAll'];
+
 document.addEventListener('DOMContentLoaded', () => {
-  const mainToggle = document.getElementById('mainToggle');
-  const statusBadge = document.getElementById('statusBadge');
   const blockedCountEl = document.getElementById('blockedCount');
 
-  // Load initial state
-  chrome.storage.local.get(['enabled', 'blockedCount'], (data) => {
-    mainToggle.checked = data.enabled !== false;
+  // Load stats and settings
+  chrome.storage.local.get(['blockedCount', ...settings], (data) => {
     blockedCountEl.textContent = data.blockedCount || 0;
-    updateBadge(mainToggle.checked);
+    
+    settings.forEach(key => {
+      const el = document.getElementById(key);
+      el.checked = data[key] !== false;
+      
+      el.addEventListener('change', () => {
+        chrome.storage.local.set({ [key]: el.checked });
+      });
+    });
   });
 
-  // Handle toggle change
-  mainToggle.addEventListener('change', () => {
-    const isEnabled = mainToggle.checked;
-    chrome.storage.local.set({ enabled: isEnabled });
-    updateBadge(isEnabled);
-  });
-
-  function updateBadge(enabled) {
-    if (enabled) {
-      statusBadge.textContent = 'Active';
-      statusBadge.classList.remove('inactive');
-    } else {
-      statusBadge.textContent = 'Paused';
-      statusBadge.classList.add('inactive');
-    }
-  }
-
-  // Listen for count updates from content script
+  // Live updates
   chrome.storage.onChanged.addListener((changes) => {
     if (changes.blockedCount) {
       blockedCountEl.textContent = changes.blockedCount.newValue;
+      animateValue(blockedCountEl);
     }
   });
 });
+
+function animateValue(el) {
+  el.style.transform = 'scale(1.2)';
+  setTimeout(() => {
+    el.style.transform = 'scale(1)';
+  }, 200);
+}
